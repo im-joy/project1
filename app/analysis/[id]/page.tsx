@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
-import { notFound } from 'next/navigation'
 import styles from './AnalysisDetail.module.css'
 
 interface PageProps {
@@ -34,6 +33,17 @@ interface Analysis {
 interface Tag {
   id: string
   name: string
+}
+
+interface TagRelation {
+  tags: {
+    id: string;
+    name: string;
+  };
+}
+
+interface AnalysisTagsResponse {
+  analysis_tags: TagRelation[];
 }
 
 export default function AnalysisDetailPage({ params }: PageProps) {
@@ -166,7 +176,7 @@ export default function AnalysisDetailPage({ params }: PageProps) {
       const formattedAnalysis = {
         ...analysisData,
         tags:
-          analysisData.analysis_tags?.map((t: any) => t.tags).filter(Boolean) ||
+          (analysisData.analysis_tags as any)?.map((t: any) => t.tags).filter(Boolean) ||
           [],
       }
 
@@ -176,7 +186,7 @@ export default function AnalysisDetailPage({ params }: PageProps) {
       if (formattedAnalysis.tags && formattedAnalysis.tags.length > 0) {
         loadRelatedAnalyses(formattedAnalysis.tags.map(tag => tag.name))
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error loading analysis:', error)
       setError('데이터를 불러오는 중 오류가 발생했습니다.')
     } finally {

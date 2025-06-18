@@ -18,6 +18,17 @@ interface Tag {
   name: string
 }
 
+interface TagRelation {
+  tags: {
+    id: string;
+    name: string;
+  };
+}
+
+interface AnalysisWithTags extends Analysis {
+  analysis_tags?: TagRelation[];
+}
+
 export default function FeedPage() {
   const [analyses, setAnalyses] = useState<Analysis[]>([])
   const [allTags, setAllTags] = useState<Tag[]>([])
@@ -116,12 +127,12 @@ export default function FeedPage() {
         data?.map(analysis => ({
           ...analysis,
           tags:
-            analysis.analysis_tags?.map((t: any) => t.tags).filter(Boolean) ||
+            (analysis as any).analysis_tags?.map((t: any) => t.tags).filter(Boolean) ||
             [],
         })) || []
 
       setAnalyses(formattedData)
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error fetching analyses:', error)
       setError('데이터를 불러오는 중 오류가 발생했습니다.')
     } finally {

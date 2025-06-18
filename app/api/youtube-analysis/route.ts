@@ -9,6 +9,20 @@ import { YoutubeTranscript } from 'youtube-transcript'
 // Gemini AI 설정
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '')
 
+interface CaptionTrack {
+    language_code: string;
+}
+
+interface VideoInfo {
+    basic_info: {
+        title: string;
+        short_description: string;
+    };
+    captions: {
+        caption_tracks: CaptionTrack[];
+    };
+}
+
 export async function POST(request: NextRequest) {
     try {
         const { url } = await request.json()
@@ -115,13 +129,13 @@ export async function POST(request: NextRequest) {
                         const captionTracks = video.captions.caption_tracks
 
                         // 한국어 자막 우선 검색
-                        let captionTrack = captionTracks.find((track: any) =>
+                        let captionTrack = captionTracks.find((track: CaptionTrack) =>
                             track.language_code === 'ko' || track.language_code === 'kr'
                         )
 
                         // 한국어가 없으면 영어 검색
                         if (!captionTrack) {
-                            captionTrack = captionTracks.find((track: any) =>
+                            captionTrack = captionTracks.find((track: CaptionTrack) =>
                                 track.language_code === 'en' || track.language_code.startsWith('en')
                             )
                         }
@@ -245,7 +259,7 @@ ${transcript}
             // JSON 파싱 시도
             try {
                 analysis = JSON.parse(responseText)
-            } catch (parseError) {
+            } catch (error) {
                 // JSON 파싱 실패 시 텍스트에서 JSON 부분 추출 시도
                 const jsonMatch = responseText.match(/\{[\s\S]*\}/)
                 if (jsonMatch) {

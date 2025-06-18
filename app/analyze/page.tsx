@@ -1,11 +1,8 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { supabase } from '@/lib/supabase'
-import { User } from '@supabase/supabase-js'
+import { useState, useEffect, useCallback } from 'react'
+import { supabase, isSupabaseConfigured } from '@/lib/supabase'
 import { useAuth } from '@/lib/auth-context'
-import { isSupabaseConfigured } from '@/lib/supabase'
-import { createAnalysisWithTags, addSearchHistory } from '@/lib/database'
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -32,6 +29,31 @@ interface AnalysisResult {
 interface Tag {
   id: string
   name: string
+}
+
+interface YoutubeAnalysisData {
+  videoId: string;
+  url: string;
+  transcript: string;
+  saved?: boolean;
+  savedId?: string;
+  message?: string;
+  analysis: {
+    title: string;
+    summary: string;
+    keyPoints: string[];
+    category: string;
+    sentiment: string;
+    difficulty: string;
+    duration_estimate: string;
+    tags: string[];
+  };
+}
+
+interface ApiResponse {
+  success: boolean;
+  data?: YoutubeAnalysisData;
+  error?: string;
 }
 
 export default function AnalyzePage() {
@@ -78,25 +100,14 @@ export default function AnalyzePage() {
   ]
 
   // 태그 이름을 기반으로 일관된 색상 반환
-  const getTagColor = (tagName: string) => {
+  const getTagColor = useCallback((tagName: string) => {
     const hash = tagName
       .split('')
       .reduce((acc, char) => acc + char.charCodeAt(0), 0)
     return pastelColors[hash % pastelColors.length]
-  }
+  }, [pastelColors])
 
-  useEffect(() => {
-    loadAvailableTags()
-
-    // URL 파라미터에서 url 값 가져오기
-    const urlParams = new URLSearchParams(window.location.search)
-    const urlParam = urlParams.get('url')
-    if (urlParam) {
-      setUrl(decodeURIComponent(urlParam))
-    }
-  }, [user]) // user가 변경될 때마다 태그를 다시 로드
-
-  const loadAvailableTags = async () => {
+  const loadAvailableTags = useCallback(async () => {
     // 기본 태그들 제공
     const defaultTags: Tag[] = [
       { id: 'travel', name: '여행' },
@@ -138,7 +149,18 @@ export default function AnalyzePage() {
       console.error('Error loading tags:', error)
       setAvailableTags(defaultTags)
     }
-  }
+  }, [user])
+
+  useEffect(() => {
+    loadAvailableTags()
+
+    // URL 파라미터에서 url 값 가져오기
+    const urlParams = new URLSearchParams(window.location.search)
+    const urlParam = urlParams.get('url')
+    if (urlParam) {
+      setUrl(decodeURIComponent(urlParam))
+    }
+  }, [loadAvailableTags])
 
   const addNewTag = async () => {
     if (!newTag.trim()) return
@@ -248,7 +270,7 @@ export default function AnalyzePage() {
         body: JSON.stringify({ url: url.trim() }),
       })
 
-      const data = await response.json()
+      const data: ApiResponse = await response.json()
 
       console.log('📡 API 응답 받음:', {
         status: response.status,
@@ -304,8 +326,6 @@ export default function AnalyzePage() {
             title: analysisResult.title
           }))
         }
-
-
 
         // 자동 이동 옵션이 켜져있고 실제로 저장된 분석인 경우 결과 페이지로 이동
         if (autoRedirect && !analysisResult.id.startsWith('demo-')) {

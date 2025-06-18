@@ -26,6 +26,25 @@ interface Tag {
   name: string
 }
 
+interface AnalysisWithTags {
+  id: string;
+  title: string;
+  description: string;
+  youtube_url: string;
+  user_description?: string;
+  created_at: string;
+  analysis_tags?: {
+    tags: {
+      id: string;
+      name: string;
+    };
+  }[];
+}
+
+interface AnalysisHistoryWithTags extends AnalysisHistory {
+  analysis: AnalysisWithTags;
+}
+
 function HistoryPageContent() {
   const { user } = useAuth()
   const [history, setHistory] = useState<AnalysisHistory[]>([])
@@ -490,13 +509,13 @@ function HistoryPageContent() {
     }
   }
 
-  const startEditAnalysis = (analysisId: string, analysis: any) => {
+  const startEditAnalysis = (analysisId: string, analysis: AnalysisWithTags) => {
     setEditingAnalysis(analysisId)
     setEditingValues({
-      title: analysis.title || '',
-      description: analysis.description || '',
+      title: analysis.title,
+      description: analysis.description,
       user_description: analysis.user_description || '',
-      tags: analysis.tags || [],
+      tags: analysis.analysis_tags?.map(t => t.tags) || [],
     })
     generateAISuggestedTags(analysis.title, analysis.description)
   }

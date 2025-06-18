@@ -24,14 +24,25 @@ interface YoutubeAnalysis {
   }
 }
 
+interface Tag {
+  id: string;
+  name: string;
+  created_at: string;
+  user_id: string;
+}
+
+interface AnalysisWithTags extends Analysis {
+  tags: Tag[];
+}
+
 export default function HomePage() {
   const [url, setUrl] = useState('')
-  const [analyses, setAnalyses] = useState<Analysis[]>([])
+  const [analyses, setAnalyses] = useState<AnalysisWithTags[]>([])
   const [loading, setLoading] = useState(true)
   const [analyzing, setAnalyzing] = useState(false)
   const [analysisResult, setAnalysisResult] = useState<YoutubeAnalysis | null>(null)
   const [analysisError, setAnalysisError] = useState<string | null>(null)
-  const { isSupabaseConfigured } = useAuth()
+  const { user } = useAuth()
 
 
 
@@ -161,14 +172,14 @@ export default function HomePage() {
       // 태그 데이터 구조 변환
       const formattedData = data.map(analysis => ({
         ...analysis,
-        tags: analysis.tags.map((t: any) => t.tag),
+        tags: analysis.tags.map((t: { tag: Tag }) => t.tag),
       }))
 
       setAnalyses(formattedData)
     } catch (error) {
       console.error('Error fetching analyses:', error)
       // 에러가 발생하면 샘플 데이터 사용
-      const sampleData: Analysis[] = [
+      const sampleData: AnalysisWithTags[] = [
         {
           id: '1',
           youtube_url: 'https://youtube.com/watch?v=dQw4w9WgXcQ',
