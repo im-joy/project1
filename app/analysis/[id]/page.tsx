@@ -618,7 +618,7 @@ export default function AnalysisDetailPage({ params }: PageProps) {
             <div className={styles.ctaContent}>
               <h3 className={styles.ctaTitle}>이 분석이 도움이 되셨나요?</h3>
               <p className={styles.ctaDescription}>
-                다른 유용한 영상들도 커뮤니티에서 확인해보세요!
+                다른 유용한 영상들도 사용자들의 분석에서 확인해보세요!
               </p>
               <div className={styles.ctaButtons}>
                 <Link href='/feed' className={styles.ctaButtonPrimary}>

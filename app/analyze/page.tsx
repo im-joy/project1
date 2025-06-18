@@ -481,81 +481,6 @@ export default function AnalyzePage() {
             <p className={styles.subtitle}>
               유튜브 URL을 입력하면 영상의 내용을 분석하여 요약해드립니다.
             </p>
-            {/* 디버깅 정보 */}
-            <div style={{
-              marginTop: '1rem',
-              padding: '0.5rem',
-              backgroundColor: '#f0f9ff',
-              border: '1px solid #bae6fd',
-              borderRadius: '8px',
-              fontSize: '0.875rem'
-            }}>
-              <div><strong>🔍 현재 상태:</strong></div>
-              <div>로그인 상태: {user ? `✅ ${user.email}` : '❌ 로그인 필요'}</div>
-              <div>사용자 ID: {user?.id || '없음'}</div>
-              <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
-                <button
-                  onClick={() => {
-                    console.log('👤 현재 사용자 정보:', user)
-                    console.log('🔐 인증 상태 상세:', {
-                      isLoggedIn: !!user,
-                      userId: user?.id,
-                      email: user?.email,
-                      userMetadata: user?.user_metadata
-                    })
-                  }}
-                  style={{
-                    padding: '0.25rem 0.5rem',
-                    fontSize: '0.75rem',
-                    backgroundColor: '#3b82f6',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '4px',
-                    cursor: 'pointer'
-                  }}
-                >
-                  사용자 정보 확인
-                </button>
-                <button
-                  onClick={async () => {
-                    try {
-                      if (!supabase) {
-                        alert('Supabase 클라이언트가 없습니다.')
-                        return
-                      }
-                      const token = (await supabase.auth.getSession()).data.session?.access_token
-                      console.log('🔑 현재 토큰:', token ? '있음' : '없음')
-
-                      const response = await fetch('/api/debug-auth', {
-                        method: 'POST',
-                        headers: {
-                          'Authorization': `Bearer ${token}`,
-                          'Content-Type': 'application/json'
-                        }
-                      })
-                      const result = await response.json()
-                      console.log('🔍 API 디버깅 결과:', result)
-
-                      alert(`디버깅 완료! 콘솔 확인:\n- 사용자 인식: ${result.auth?.hasUser ? '✅' : '❌'}\n- DB 연결: ${result.database?.connected ? '✅' : '❌'}\n- 토큰: ${result.request?.hasAuthHeader ? '✅' : '❌'}`)
-                    } catch (error) {
-                      console.error('❌ 디버깅 실패:', error)
-                      alert('디버깅 실패: ' + error)
-                    }
-                  }}
-                  style={{
-                    padding: '0.25rem 0.5rem',
-                    fontSize: '0.75rem',
-                    backgroundColor: '#dc2626',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '4px',
-                    cursor: 'pointer'
-                  }}
-                >
-                  🔍 인증 & DB 테스트
-                </button>
-              </div>
-            </div>
           </div>
 
           {/* 분석 폼 */}
@@ -1234,7 +1159,7 @@ export default function AnalyzePage() {
                   href='/feed'
                   className={`${styles.button} ${styles.buttonPrimary}`}
                 >
-                  커뮤니티 피드 보기
+                  다른 사용자의 분석 보기
                 </Link>
                 {user && (
                   <Link
