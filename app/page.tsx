@@ -292,9 +292,9 @@ export default function HomePage() {
                   type='url'
                   value={url}
                   onChange={e => setUrl(e.target.value)}
-                  placeholder='YouTube 영상 링크를 붙여넣어보세요...'
+                  placeholder='YouTube 영상 링크를 붙여넣어보세요.'
                   className='input'
-                  style={{ fontSize: '1.125rem' }}
+                  style={{ fontSize: '1.125rem', width: '400px' }}
                   required
                 />
                 <button
